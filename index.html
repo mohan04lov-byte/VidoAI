@@ -1,1 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidoAI - AI Video Creator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 
+<body>
+
+  <header>
+    <div class="logo">🎬 VidoAI</div>
+    <p>Turn your idea into a complete video concept</p>
+  </header>
+
+  <main class="container">
+
+    <section class="card">
+      <h1>Create Your Video</h1>
+
+      <label for="idea">💡 Your Video Idea</label>
+      <textarea id="idea" placeholder="Example: A funny monkey makes a vlog in Kolkata..."></textarea>
+
+      <div class="options">
+        <div>
+          <label for="style">🎨 Style</label>
+          <select id="style">
+            <option>Cinematic</option>
+            <option>Funny</option>
+            <option>Realistic</option>
+            <option>Cartoon</option>
+            <option>Anime</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="duration">⏱️ Duration</label>
+          <select id="duration">
+            <option>30 Seconds</option>
+            <option>1 Minute</option>
+            <option>2 Minutes</option>
+            <option>5 Minutes</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="language">🌐 Language</label>
+          <select id="language">
+            <option>English</option>
+            <option>Hindi</option>
+            <option>Bengali</option>
+          </select>
+        </div>
+      </div>
+
+      <button onclick="generateVideo()">🚀 Generate Video</button>
+    </section>
+
+    <section id="result" class="card result hidden">
+      <h2>🎬 Your Video Concept</h2>
+
+      <div id="output"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>© 2026 VidoAI • Create. Imagine. Share.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

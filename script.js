@@ -19,7 +19,7 @@ function generateVideo() {
     },
     {
       name: "Scene 2 — The Journey",
-      visual: `A detailed ${style.toLowerCase()} scene showing the main character exploring the world connected to "${idea}". Dynamic camera movement, natural expressions, detailed environment.`,
+      visual: `A detailed ${style.toLowerCase()} scene showing the main character exploring the world connected to "${idea}". Dynamic camera movement, natural expressions and detailed environment.`,
       dialogue: "This place is amazing! I can't believe what I'm seeing."
     },
     {
@@ -43,18 +43,20 @@ function generateVideo() {
     <div class="scene">
       <h3>🎬 ${title}</h3>
       <p><strong>💡 Idea:</strong> ${escapeHTML(idea)}</p>
-      <p><strong>🎨 Style:</strong> ${style}</p>
-      <p><strong>⏱️ Duration:</strong> ${duration}</p>
-      <p><strong>🌐 Language:</strong> ${language}</p>
+      <p><strong>🎨 Style:</strong> ${escapeHTML(style)}</p>
+      <p><strong>⏱️ Duration:</strong> ${escapeHTML(duration)}</p>
+      <p><strong>🌐 Language:</strong> ${escapeHTML(language)}</p>
     </div>
 
     <div class="scene">
       <h3>📖 Story</h3>
       <p>
-        ${escapeHTML(idea)} becomes an exciting ${duration.toLowerCase()}
-        ${style.toLowerCase()} story. The journey begins with an engaging
-        introduction, develops through an unexpected challenge, and ends
-        with a memorable conclusion.
+        ${escapeHTML(idea)} becomes an exciting
+        ${escapeHTML(duration.toLowerCase())}
+        ${escapeHTML(style.toLowerCase())} story.
+        The journey begins with an engaging introduction,
+        develops through an unexpected challenge,
+        and ends with a memorable conclusion.
       </p>
     </div>
 
@@ -80,9 +82,18 @@ function generateVideo() {
           📋 Copy Scene
         </button>
 
-        <textarea id="scene-${index}" style="display:none;">${scene.visual}
+        <button onclick="generateSceneImage(${index})" style="margin-top:10px;">
+          🖼️ Generate Image
+        </button>
+
+        <textarea
+          id="scene-${index}"
+          style="display:none;"
+        >${scene.visual}
 
 ${scene.dialogue}</textarea>
+
+        <div id="image-${index}" style="margin-top:15px;"></div>
       </div>
     `;
   });
@@ -103,15 +114,21 @@ ${scene.dialogue}</textarea>
       <h3>🎵 Music Suggestion</h3>
       <p>
         Cinematic background music with an energetic introduction,
-        rising tension during the problem, and an emotional ending.
+        rising tension during the problem,
+        and an emotional ending.
       </p>
     </div>
 
     <div class="scene">
-      <h3>🚀 Next Step</h3>
+      <h3>🚀 VidoAI Status</h3>
       <p>
-        Your concept is ready. These scene prompts can later be connected
-        to an AI image/video generation service.
+        ✅ Video concept generated successfully.
+      </p>
+      <p>
+        🖼️ Scene image generation interface is ready.
+      </p>
+      <p>
+        🔜 AI image API can be connected next.
       </p>
     </div>
   `;
@@ -145,18 +162,66 @@ function makeTitle(idea) {
 function copyText(index) {
   const text = document.getElementById(`scene-${index}`).value;
 
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      alert("Scene copied! ✅");
-    })
-    .catch(() => {
-      alert("Copy failed. Please copy manually.");
-    });
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        alert("Scene copied! ✅");
+      })
+      .catch(() => {
+        alert("Copy failed. Please copy manually.");
+      });
+  } else {
+    alert("Copy is not supported in this browser.");
+  }
+}
+
+
+function generateSceneImage(index) {
+  const box = document.getElementById(`image-${index}`);
+
+  box.innerHTML = `
+    <div class="scene">
+      <h3>🖼️ Image Generator</h3>
+      <p>
+        Scene ${index + 1} image prompt is ready.
+      </p>
+
+      <p>
+        🔜 AI image generation will be connected here.
+      </p>
+
+      <button onclick="copyImagePrompt(${index})">
+        📋 Copy Image Prompt
+      </button>
+    </div>
+  `;
+}
+
+
+function copyImagePrompt(index) {
+  const textarea = document.getElementById(`scene-${index}`);
+
+  if (!textarea) {
+    alert("Image prompt not found.");
+    return;
+  }
+
+  const prompt = textarea.value.split("\n\n")[0];
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(prompt)
+      .then(() => {
+        alert("Image prompt copied! 🖼️✅");
+      })
+      .catch(() => {
+        alert("Copy failed.");
+      });
+  }
 }
 
 
 function escapeHTML(text) {
-  return text
+  return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

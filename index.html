@@ -1,197 +1,308 @@
-<!DOCTYPE html><html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#111827">
-  <title>VidoAI — AI Video Creator</title>
-  <link rel="stylesheet" href="style.css">
-</head><body><header class="hero">
-  <div class="logo">🎬 VidoAI</div>
-  <h1>Turn Your Idea Into a Video</h1>
-  <p>Create stories, scenes, prompts, dialogue and voice-over in seconds.</p>
-</header><main class="container">  <!-- CREATE -->  <section class="card create-card"><div class="section-title">
-  <span>✨</span>
-  <div>
-    <h2>Create Your Video</h2>
-    <p>Tell VidoAI what you want to create.</p>
-  </div>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>VidoAI — AI Video Creator</title>  <link rel="stylesheet" href="style.css">
+</head><body>  <header class="hero"><div class="logo">
+  🎬 VidoAI
 </div>
 
-<label for="idea">💡 Video Idea</label>
+<h1>Turn Your Idea Into a Video</h1>
 
-<textarea
-  id="idea"
-  placeholder="Example: A funny monkey makes a vlog while exploring Kolkata..."
-></textarea>
-
-<div class="options">
-
-  <div>
-    <label for="style">🎨 Style</label>
-    <select id="style">
-      <option>Cinematic</option>
-      <option>Realistic</option>
-      <option>Funny</option>
-      <option>Documentary</option>
-      <option>Cartoon</option>
-      <option>Anime</option>
-      <option>3D Animation</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="duration">⏱️ Duration</label>
-    <select id="duration">
-      <option>15 Seconds</option>
-      <option selected>30 Seconds</option>
-      <option>1 Minute</option>
-      <option>2 Minutes</option>
-      <option>5 Minutes</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="language">🌐 Language</label>
-    <select id="language">
-      <option>English</option>
-      <option>Hindi</option>
-      <option>Bengali</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="aspect">📐 Aspect Ratio</label>
-    <select id="aspect">
-      <option>9:16 — Shorts / Reels</option>
-      <option>16:9 — YouTube</option>
-      <option>1:1 — Square</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="mood">🎭 Mood</label>
-    <select id="mood">
-      <option>Energetic</option>
-      <option>Funny</option>
-      <option>Emotional</option>
-      <option>Epic</option>
-      <option>Suspenseful</option>
-      <option>Peaceful</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="camera">🎥 Camera</label>
-    <select id="camera">
-      <option>Dynamic Cinematic</option>
-      <option>Handheld Vlog</option>
-      <option>Slow Motion</option>
-      <option>Drone Shot</option>
-      <option>Documentary</option>
-    </select>
-  </div>
-
-</div>
-
-<button id="generateBtn" class="generate-btn" onclick="generateVideo()">
-  🚀 Generate Video Concept
-</button>
-
-<p class="small-note">
-  ⚡ Local fallback is available — you can create a concept even without an AI API.
+<p>
+  Create story, scenes, prompts, dialogue and voice-over
+  from one simple idea.
 </p>
 
-  </section>  <!-- LOADING -->  <section id="loading" class="card loading hidden"><div class="loader"></div>
+  </header>  <main class="container"><!-- CREATE CARD -->
 
-<h2>🎬 Creating Your Video...</h2>
+<section class="card">
 
-<p id="loadingText">
-  Understanding your idea...
-</p>
+  <h2>🚀 Create Your Video</h2>
 
-<div class="progress">
-  <div id="progressBar"></div>
-</div>
+  <label for="idea">
+    💡 Your Video Idea
+  </label>
 
-  </section>  <!-- RESULT -->  <section id="result" class="card result hidden"><div class="result-header">
-  <div>
-    <span class="badge">✨ VidoAI Concept</span>
-    <h2 id="resultTitle">Your Video</h2>
+  <textarea
+    id="idea"
+    placeholder="Example: A funny monkey makes a vlog in Kolkata..."
+  ></textarea>
+
+
+  <div class="options">
+
+    <!-- STYLE -->
+
+    <div>
+      <label for="style">
+        🎨 Style
+      </label>
+
+      <select id="style">
+
+        <option>Cinematic</option>
+        <option>Funny</option>
+        <option>Realistic</option>
+        <option>Cartoon</option>
+        <option>Anime</option>
+        <option>3D Animation</option>
+
+      </select>
+    </div>
+
+
+    <!-- DURATION -->
+
+    <div>
+      <label for="duration">
+        ⏱️ Duration
+      </label>
+
+      <select id="duration">
+
+        <option>30 Seconds</option>
+        <option>1 Minute</option>
+        <option>2 Minutes</option>
+        <option>5 Minutes</option>
+
+      </select>
+    </div>
+
+
+    <!-- LANGUAGE -->
+
+    <div>
+      <label for="language">
+        🌐 Language
+      </label>
+
+      <select id="language">
+
+        <option>English</option>
+        <option>Hindi</option>
+        <option>Bengali</option>
+
+      </select>
+    </div>
+
+
+    <!-- ASPECT -->
+
+    <div>
+      <label for="aspect">
+        📱 Aspect Ratio
+      </label>
+
+      <select id="aspect">
+
+        <option>9:16</option>
+        <option>16:9</option>
+        <option>1:1</option>
+
+      </select>
+    </div>
+
+
+    <!-- MOOD -->
+
+    <div>
+      <label for="mood">
+        😊 Mood
+      </label>
+
+      <select id="mood">
+
+        <option>Energetic</option>
+        <option>Funny</option>
+        <option>Emotional</option>
+        <option>Dramatic</option>
+        <option>Peaceful</option>
+        <option>Epic</option>
+
+      </select>
+    </div>
+
+
+    <!-- CAMERA -->
+
+    <div>
+      <label for="camera">
+        🎥 Camera
+      </label>
+
+      <select id="camera">
+
+        <option>Cinematic slow movement</option>
+        <option>Handheld vlog camera</option>
+        <option>Drone shot</option>
+        <option>Close-up</option>
+        <option>Wide angle</option>
+        <option>Dynamic tracking shot</option>
+
+      </select>
+    </div>
+
   </div>
 
-  <button class="secondary-btn" onclick="downloadConcept()">
-    📥 Save Concept
+
+  <!-- GENERATE -->
+
+  <button
+    id="generateBtn"
+    onclick="generateVideo()"
+  >
+    🚀 Generate Video Concept
   </button>
-</div>
 
-<!-- STORY -->
-<div class="result-block">
-  <h3>📖 Story</h3>
-  <div id="story"></div>
-</div>
+</section>
 
-<!-- CHARACTER -->
-<div class="result-block">
-  <h3>👤 Character</h3>
-  <div id="character"></div>
-</div>
 
-<!-- SCENES -->
-<div class="result-block">
-  <h3>🎞️ Scene Breakdown</h3>
-  <div id="scenes"></div>
-</div>
+<!-- LOADING -->
 
-<!-- VOICE -->
-<div class="result-block">
-  <h3>🎙️ Voice-over Script</h3>
-  <div id="voiceover"></div>
-</div>
+<section
+  id="loading"
+  class="card loading hidden"
+>
 
-<!-- MUSIC -->
-<div class="result-block">
-  <h3>🎵 Music & Sound</h3>
-  <div id="music"></div>
-</div>
-
-<!-- MASTER PROMPT -->
-<div class="result-block">
-  <h3>🧠 Master Video Prompt</h3>
-
-  <div class="prompt-box">
-    <p id="masterPrompt"></p>
-
-    <button class="copy-btn" onclick="copyMasterPrompt()">
-      📋 Copy Master Prompt
-    </button>
+  <div class="loader">
+    🎬
   </div>
-</div>
 
-<!-- STATUS -->
-<div class="status-box">
-  <h3>🚀 VidoAI Pipeline</h3>
+  <h3 id="loadingText">
+    Creating your video...
+  </h3>
 
-  <div class="pipeline">
-    <span>💡 Idea</span>
-    <span>→</span>
-    <span>🧠 Story</span>
-    <span>→</span>
-    <span>🎞️ Scenes</span>
-    <span>→</span>
-    <span>🖼️ Images</span>
-    <span>→</span>
-    <span>🎥 Video</span>
-    <span>→</span>
-    <span>🎬 Final MP4</span>
+  <div class="progress">
+    <div
+      id="progressBar"
+      class="progress-bar"
+    ></div>
   </div>
 
   <p>
-    ✅ Concept generation is working.<br>
-    🔜 AI image, video and voice APIs will be connected in the next steps.
+    VidoAI is building your story and scenes...
   </p>
-</div>
 
-  </section></main><footer>
-  <p>© 2026 VidoAI • Create. Imagine. Share.</p>
-</footer><script src="script.js"></script></body>
-</html>
+</section>
+
+
+<!-- RESULT -->
+
+<section
+  id="result"
+  class="card result hidden"
+>
+
+  <h2>
+    🎬 Your Video Project
+  </h2>
+
+  <h3
+    id="resultTitle"
+    class="project-title"
+  ></h3>
+
+
+  <!-- STORY -->
+
+  <div class="result-block">
+
+    <h3>
+      📖 Story
+    </h3>
+
+    <div id="story"></div>
+
+  </div>
+
+
+  <!-- CHARACTER -->
+
+  <div class="result-block">
+
+    <h3>
+      👤 Main Character
+    </h3>
+
+    <div id="character"></div>
+
+  </div>
+
+
+  <!-- SCENES -->
+
+  <div class="result-block">
+
+    <h3>
+      🎞️ Scene Breakdown
+    </h3>
+
+    <div id="scenes"></div>
+
+  </div>
+
+
+  <!-- VOICEOVER -->
+
+  <div class="result-block">
+
+    <h3>
+      🎙️ Voice-over Script
+    </h3>
+
+    <div id="voiceover"></div>
+
+  </div>
+
+
+  <!-- MUSIC -->
+
+  <div class="result-block">
+
+    <h3>
+      🎵 Music Suggestion
+    </h3>
+
+    <div id="music"></div>
+
+  </div>
+
+
+  <!-- MASTER PROMPT -->
+
+  <div class="result-block">
+
+    <h3>
+      🤖 Master AI Prompt
+    </h3>
+
+    <textarea
+      id="masterPrompt"
+      readonly
+    ></textarea>
+
+    <button
+      class="secondary-btn"
+      onclick="copyMasterPrompt()"
+    >
+      📋 Copy Master Prompt
+    </button>
+
+  </div>
+
+
+  <!-- DOWNLOAD -->
+
+  <button
+    class="download-btn"
+    onclick="downloadConcept()"
+  >
+    💾 Download Project
+  </button>
+
+</section>
+
+  </main>  <footer><p>
+  © 2026 VidoAI • Create. Imagine. Share.
+</p>
+
+  </footer>  <script src="script.js"></script></body></html>

@@ -1,19 +1,33 @@
 let currentProject = null;
 
 function generateVideo() {
-const idea = document.getElementById("idea").value.trim();
-const style = document.getElementById("style").value;
-const duration = document.getElementById("duration").value;
-const language = document.getElementById("language").value;
-const aspect = document.getElementById("aspect").value;
-const mood = document.getElementById("mood").value;
-const camera = document.getElementById("camera").value;
+const ideaEl = document.getElementById("idea");
+const styleEl = document.getElementById("style");
+const durationEl = document.getElementById("duration");
+const languageEl = document.getElementById("language");
+const aspectEl = document.getElementById("aspect");
+const moodEl = document.getElementById("mood");
+const cameraEl = document.getElementById("camera");
+
+if (!ideaEl) {
+alert("VidoAI error: Idea box not found.");
+return;
+}
+
+const idea = ideaEl.value.trim();
 
 if (!idea) {
 alert("Please enter your video idea first! 💡");
-document.getElementById("idea").focus();
+ideaEl.focus();
 return;
 }
+
+const style = styleEl ? styleEl.value : "Cinematic";
+const duration = durationEl ? durationEl.value : "30 Seconds";
+const language = languageEl ? languageEl.value : "English";
+const aspect = aspectEl ? aspectEl.value : "9:16";
+const mood = moodEl ? moodEl.value : "Energetic";
+const camera = cameraEl ? cameraEl.value : "Cinematic slow movement";
 
 const button = document.getElementById("generateBtn");
 const loading = document.getElementById("loading");
@@ -21,78 +35,117 @@ const result = document.getElementById("result");
 const loadingText = document.getElementById("loadingText");
 const progressBar = document.getElementById("progressBar");
 
+if (!button || !loading || !result) {
+alert("VidoAI page is not loaded correctly. Please refresh the page.");
+return;
+}
+
 button.disabled = true;
 button.textContent = "⏳ Creating...";
+
 loading.classList.remove("hidden");
 result.classList.add("hidden");
+
+if (progressBar) {
 progressBar.style.width = "0%";
+}
 
 const steps = [
 "Understanding your idea...",
-"Building the story...",
-"Creating the character...",
+"Building your story...",
+"Creating your character...",
 "Designing 5 scenes...",
 "Writing cinematic prompts...",
 "Preparing voice-over...",
-"Finishing your video concept..."
+"Finishing your project..."
 ];
 
 let step = 0;
 
 const interval = setInterval(() => {
 if (step < steps.length) {
-loadingText.textContent = steps[step];
-step++;
 
-  const progress = Math.min(
-    95,
-    Math.round((step / steps.length) * 100)
-  );
+  if (loadingText) {
+    loadingText.textContent = steps[step];
+  }
 
-  progressBar.style.width = progress + "%";
+  step++;
+
+  if (progressBar) {
+    progressBar.style.width =
+      Math.min(95, Math.round((step / steps.length) * 100)) + "%";
+  }
+
 }
 
 }, 350);
 
 setTimeout(() => {
+
 clearInterval(interval);
 
-progressBar.style.width = "100%";
-loadingText.textContent = "Your video concept is ready! 🎉";
+try {
 
-currentProject = createProject(
-  idea,
-  style,
-  duration,
-  language,
-  aspect,
-  mood,
-  camera
-);
+  currentProject = createProject({
+    idea,
+    style,
+    duration,
+    language,
+    aspect,
+    mood,
+    camera
+  });
 
-renderProject(currentProject);
+  renderProject(currentProject);
 
-setTimeout(() => {
+  if (progressBar) {
+    progressBar.style.width = "100%";
+  }
+
+  if (loadingText) {
+    loadingText.textContent =
+      "Your video concept is ready! 🎉";
+  }
+
+  setTimeout(() => {
+
+    loading.classList.add("hidden");
+    result.classList.remove("hidden");
+
+    button.disabled = false;
+    button.textContent = "🚀 Generate Video Concept";
+
+    result.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+  }, 500);
+
+} catch (error) {
+
+  console.error("VidoAI Error:", error);
+
   loading.classList.add("hidden");
-  result.classList.remove("hidden");
 
   button.disabled = false;
   button.textContent = "🚀 Generate Video Concept";
 
-  result.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}, 500);
+  alert(
+    "Something went wrong while creating the project. Please refresh and try again."
+  );
+}
 
 }, 2800);
 }
 
 /* =========================
-PROJECT CREATOR
+PROJECT
 ========================= */
 
-function createProject(
+function createProject(data) {
+
+const {
 idea,
 style,
 duration,
@@ -100,39 +153,50 @@ language,
 aspect,
 mood,
 camera
-) {
-const title = makeTitle(idea);
-const subject = getSubject(idea);
-const character = createCharacter(subject, style);
+} = data;
 
-const scenes = createScenes(
+const title = makeTitle(idea);
+
+const subject = getSubject(idea);
+
+const character = createCharacter(
+subject,
+style
+);
+
+const scenes = createScenes({
 idea,
 subject,
 character,
 style,
 duration,
 language,
+aspect,
 mood,
-camera,
-aspect
-);
+camera
+});
 
 const story = createStory(
 idea,
 subject,
+duration,
 mood,
-duration
+language
 );
 
 const voiceover = createVoiceover(
 subject,
+idea,
 language,
 scenes
 );
 
-const music = createMusic(style, mood);
+const music = createMusic(
+style,
+mood
+);
 
-const masterPrompt = createMasterPrompt(
+const masterPrompt = createMasterPrompt({
 idea,
 character,
 style,
@@ -141,7 +205,7 @@ language,
 aspect,
 mood,
 camera
-);
+});
 
 return {
 title,
@@ -152,6 +216,7 @@ language,
 aspect,
 mood,
 camera,
+subject,
 character,
 story,
 scenes,
@@ -166,6 +231,7 @@ CHARACTER
 ========================= */
 
 function createCharacter(subject, style) {
+
 const lower = subject.toLowerCase();
 
 if (
@@ -173,29 +239,76 @@ lower.includes("monkey") ||
 lower.includes("बंदर") ||
 lower.includes("বানর")
 ) {
-return "A funny and expressive ${style.toLowerCase()} monkey vlogger, intelligent eyes, natural facial expressions, consistent appearance in every scene, wearing a small stylish vlog outfit and holding a compact camera.";
+
+return `A funny and expressive ${style.toLowerCase()} monkey vlogger with intelligent eyes, natural facial expressions, consistent face and body, wearing a stylish vlog outfit and holding a compact camera. The monkey must look identical in every scene.`;
+
 }
 
-return "The main character connected to "${subject}", designed in a ${style.toLowerCase()} visual style, expressive face, consistent clothing and appearance throughout every scene, natural body movement and cinematic presence.";
+return "The main character connected to "${subject}", designed in a ${style.toLowerCase()} visual style with a consistent face, body, clothing and identity in every scene. Natural expressions, realistic movement and strong cinematic presence.";
 }
 
 /* =========================
 STORY
 ========================= */
 
-function createStory(idea, subject, mood, duration) {
+function createStory(
+idea,
+subject,
+duration,
+mood,
+language
+) {
+
+if (language === "Hindi") {
+
 return `
-The story follows ${subject} as the main character in a ${duration.toLowerCase()} adventure.
 
-The journey begins by introducing the character and the world around them.
+${subject} की कहानी "${idea}" से शुरू होती है।
 
-The character then explores the situation connected to "${idea}" and discovers something unexpected.
+शुरुआत में audience को character और उसकी दुनिया से introduce किया जाता है।
 
-A challenge appears and creates tension.
+इसके बाद ${subject} adventure पर निकलता है और रास्ते में एक unexpected situation सामने आती है।
 
-The character reacts, takes action and finds a creative way forward.
+समस्या कहानी में excitement और tension पैदा करती है।
 
-The story ends with a memorable final moment that matches the ${mood.toLowerCase()} mood and leaves the audience wanting to see the next adventure.
+${subject} हिम्मत और creativity से situation को solve करने की कोशिश करता है।
+
+अंत में एक memorable और ${mood.toLowerCase()} ending होती है, जिससे audience अगले adventure का इंतजार करती है।
+`.trim();
+
+}
+
+if (language === "Bengali") {
+
+return `
+
+"${idea}"-কে কেন্দ্র করে ${subject}-এর গল্প শুরু হয়।
+
+প্রথমে audience-এর সঙ্গে character এবং তার surroundings-এর পরিচয় করানো হয়।
+
+এরপর ${subject} adventure-এ বেরিয়ে পড়ে এবং একটি unexpected situation-এর মুখোমুখি হয়।
+
+সমস্যাটি গল্পে excitement এবং tension তৈরি করে।
+
+${subject} সাহস এবং creativity ব্যবহার করে সমস্যাটি সমাধান করার চেষ্টা করে।
+
+শেষে একটি memorable এবং ${mood.toLowerCase()} ending আসে।
+`.trim();
+
+}
+
+return `
+The story begins with ${subject} in a world connected to "${idea}".
+
+The opening introduces the main character, location and atmosphere.
+
+The character starts an exciting journey and discovers something unexpected.
+
+A problem appears and creates tension.
+
+${subject} uses courage and creativity to solve the situation.
+
+The story ends with a memorable ${mood.toLowerCase()} conclusion that makes the audience want another adventure.
 `.trim();
 }
 
@@ -203,45 +316,54 @@ The story ends with a memorable final moment that matches the ${mood.toLowerCase
 SCENES
 ========================= */
 
-function createScenes(
+function createScenes(data) {
+
+const {
 idea,
 subject,
 character,
 style,
 duration,
 language,
+aspect,
 mood,
-camera,
-aspect
-) {
+camera
+} = data;
+
 const sceneData = [
+
 {
-title: "The Beginning",
-action: "Introduce ${subject} and establish the world of "${idea}".",
-dialogue: getDialogue(language, 1)
+  title: "The Beginning",
+  action:
+    `Introduce ${subject}, the location and the world of "${idea}".`,
+  dialogue: getDialogue(language, 1)
 },
 
 {
   title: "The Journey",
-  action: `${subject} starts exploring the environment and discovers interesting details connected to the idea.`,
+  action:
+    `${subject} explores the environment and discovers interesting details related to "${idea}".`,
   dialogue: getDialogue(language, 2)
 },
 
 {
   title: "The Problem",
-  action: `An unexpected challenge appears and changes the direction of the story.`,
+  action:
+    `An unexpected problem suddenly appears and changes the direction of the adventure.`,
   dialogue: getDialogue(language, 3)
 },
 
 {
   title: "The Action",
-  action: `${subject} takes action and tries to solve the problem in an exciting way.`,
+  action:
+    `${subject} takes action and attempts to solve the problem in an exciting way.`,
   dialogue: getDialogue(language, 4)
 },
 
 {
   title: "The Ending",
-  action: `The adventure reaches a satisfying conclusion with a memorable final shot.`,
+  action:
+    `${subject} successfully completes the adventure and reaches a memorable final moment.`,
   dialogue: getDialogue(language, 5)
 }
 
@@ -249,21 +371,24 @@ dialogue: getDialogue(language, 1)
 
 return sceneData.map((scene, index) => {
 
-const visual = `
+const visualPrompt = `
 
-${style} cinematic scene with ${camera} camera movement.
+${style} cinematic scene.
 
 MAIN CHARACTER:
 ${character}
 
-STORY ACTION:
+SCENE:
 ${scene.action}
 
-ORIGINAL VIDEO IDEA:
+ORIGINAL IDEA:
 ${idea}
 
 MOOD:
 ${mood}
+
+CAMERA:
+${camera}
 
 LANGUAGE:
 ${language}
@@ -271,41 +396,46 @@ ${language}
 ASPECT RATIO:
 ${aspect}
 
-Environment should feel detailed, natural and believable.
+Create a highly detailed environment with cinematic lighting,
+natural expressions, realistic body movement, professional composition,
+depth of field and smooth visual quality.
 
-Maintain the exact same character appearance, clothing and identity.
+Maintain exactly the same character identity, face, body,
+clothing, colors and accessories across every scene.
 
-Natural body movement, realistic expressions, cinematic composition,
-professional lighting, depth of field, high detail and smooth motion.
-
-No text, no watermark, no distorted anatomy.
-`.trim();
-
-const videoPrompt = `
-
-Create a video shot based on this scene.
-
-${visual}
-
-Camera movement should be smooth and professional.
-The character should move naturally and interact with the environment.
-Keep strong visual continuity with all other scenes.
+No random character changes.
+No distorted face.
+No extra fingers or limbs.
+No text.
+No watermark.
 `.trim();
 
 const imagePrompt = `
 
-Create a high-quality keyframe image for this scene.
+Create a high-quality cinematic keyframe image.
 
-${visual}
+${visualPrompt}
 
-Photorealistic cinematic composition with strong subject focus,
-detailed environment and consistent character identity.
+Focus on the main character and the environment.
+Photorealistic details, natural lighting and professional framing.
+`.trim();
+
+const videoPrompt = `
+
+Create a ${duration.toLowerCase()} AI video shot.
+
+${visualPrompt}
+
+Use smooth ${camera.toLowerCase()} movement.
+Natural character animation and realistic interaction with the environment.
+Keep continuity with the previous and next scenes.
 `.trim();
 
 return {
   number: index + 1,
   title: scene.title,
-  visual,
+  action: scene.action,
+  visual: visualPrompt,
   imagePrompt,
   videoPrompt,
   dialogue: scene.dialogue
@@ -318,18 +448,20 @@ return {
 DIALOGUE
 ========================= */
 
-function getDialogue(language, scene) {
-const dialogues = {
+function getDialogue(language, number) {
+
+const dialogue = {
+
 English: [
-"Hello everyone! Our adventure starts right here.",
-"This place is incredible. Let's see what happens next!",
-"Wait... something unexpected just happened!",
-"I have an idea. Let's solve this together!",
-"What an adventure! Thanks for watching!"
+  "Hello everyone! Our adventure starts right here.",
+  "Wow! This place is amazing. Let's see what happens next!",
+  "Wait... something unexpected just happened!",
+  "I have an idea. Let's solve this together!",
+  "What an adventure! Thanks for watching!"
 ],
 
 Hindi: [
-  "नमस्ते दोस्तों! हमारी adventure यहीं से शुरू होती है।",
+  "नमस्ते दोस्तों! हमारा adventure यहीं से शुरू होता है।",
   "वाह! यह जगह तो कमाल की है। देखते हैं आगे क्या होता है!",
   "रुको... यहाँ कुछ unexpected हो गया!",
   "मेरे पास एक idea है। चलो इसे solve करते हैं!",
@@ -346,26 +478,49 @@ Bengali: [
 
 };
 
-return dialogues[language][scene - 1];
+const list = dialogue[language] || dialogue.English;
+
+return list[number - 1];
 }
 
 /* =========================
 VOICEOVER
 ========================= */
 
-function createVoiceover(subject, language, scenes) {
+function createVoiceover(
+subject,
+idea,
+language,
+scenes
+) {
+
 let intro;
 let ending;
 
 if (language === "Hindi") {
-intro = "दोस्तों, आज हम ${subject} के साथ एक शानदार adventure पर निकल रहे हैं।";
-ending = "यह adventure सच में यादगार रहा। फिर मिलेंगे एक नई कहानी के साथ!";
+
+intro =
+  `दोस्तों, आज हम ${subject} के साथ "${idea}" से जुड़ी एक शानदार adventure पर निकल रहे हैं।`;
+
+ending =
+  "यह adventure सच में यादगार रहा। फिर मिलेंगे एक नई कहानी के साथ!";
+
 } else if (language === "Bengali") {
-intro = "বন্ধুরা, আজ আমরা ${subject}-এর সঙ্গে একটি দারুণ adventure-এ বেরিয়েছি।";
-ending = "এই adventure সত্যিই অসাধারণ ছিল। আবার দেখা হবে নতুন গল্প নিয়ে!";
+
+intro =
+  `বন্ধুরা, আজ আমরা ${subject}-এর সঙ্গে "${idea}" নিয়ে একটি দারুণ adventure-এ বেরিয়েছি।`;
+
+ending =
+  "এই adventure সত্যিই অসাধারণ ছিল। আবার দেখা হবে নতুন গল্প নিয়ে!";
+
 } else {
-intro = "Today we are joining ${subject} on an incredible adventure.";
-ending = "This adventure was truly unforgettable. See you in the next story!";
+
+intro =
+  `Today we are joining ${subject} on an incredible adventure based on "${idea}".`;
+
+ending =
+  "This adventure was truly unforgettable. See you in the next story!";
+
 }
 
 const dialogue = scenes
@@ -384,14 +539,26 @@ MUSIC
 ========================= */
 
 function createMusic(style, mood) {
-return "Cinematic ${style.toLowerCase()} background music with a ${mood.toLowerCase()} atmosphere. Start softly, build energy during the middle section, add tension during the challenge, then finish with an emotional and memorable ending. Include subtle environmental sound effects and clean dialogue space.";
+
+return `
+Cinematic ${style.toLowerCase()} background music with a ${mood.toLowerCase()} atmosphere.
+
+Start with a strong opening, gradually build energy,
+increase tension during the problem,
+add energetic music during the action,
+and finish with an emotional memorable ending.
+
+Include subtle environmental sounds and clear space for dialogue.
+`.trim();
 }
 
 /* =========================
 MASTER PROMPT
 ========================= */
 
-function createMasterPrompt(
+function createMasterPrompt(data) {
+
+const {
 idea,
 character,
 style,
@@ -400,9 +567,10 @@ language,
 aspect,
 mood,
 camera
-) {
+} = data;
+
 return `
-Create a complete ${duration.toLowerCase()} ${style.toLowerCase()} video.
+Create a complete ${duration.toLowerCase()} ${style.toLowerCase()} AI video.
 
 VIDEO IDEA:
 ${idea}
@@ -422,89 +590,121 @@ ${camera}
 FORMAT:
 ${aspect}
 
-Create a coherent story with five connected scenes.
+Create five connected cinematic scenes:
 
-Maintain strong character consistency across every scene.
-Keep the same face, body, clothing, colors and identity.
+1. Strong opening hook.
+2. Character journey.
+3. Unexpected problem.
+4. Exciting action.
+5. Memorable ending.
 
-Use cinematic composition, realistic lighting, natural movement,
-professional camera work and smooth transitions.
+CHARACTER CONSISTENCY:
+Keep the exact same face, body, clothing,
+colors, accessories and identity throughout the entire video.
 
-Include:
+VISUAL QUALITY:
+Cinematic lighting, realistic movement,
+natural expressions, detailed environment,
+professional camera composition and smooth transitions.
 
-- Strong opening hook
-- Clear story progression
-- Interesting middle section
-- Conflict or surprise
-- Satisfying ending
-- Natural dialogue
-- Voice-over friendly pacing
-- Background music
-- Environmental sound
-
-Avoid:
-
-- Random character changes
-- Extra fingers or limbs
-- Distorted faces
-- Flickering objects
-- Broken anatomy
-- Text artifacts
-- Watermarks
-  `.trim();
-  }
+NEGATIVE PROMPT:
+No distorted faces.
+No extra fingers.
+No extra limbs.
+No broken anatomy.
+No random characters.
+No flickering.
+No text artifacts.
+No watermark.
+`.trim();
+}
 
 /* =========================
 RENDER
 ========================= */
 
 function renderProject(project) {
-document.getElementById("resultTitle").textContent =
-project.title;
 
-document.getElementById("story").innerHTML =
+const title = document.getElementById("resultTitle");
+const story = document.getElementById("story");
+const character = document.getElementById("character");
+const voiceover = document.getElementById("voiceover");
+const music = document.getElementById("music");
+const masterPrompt = document.getElementById("masterPrompt");
+const scenesContainer = document.getElementById("scenes");
+
+if (
+!title ||
+!story ||
+!character ||
+!voiceover ||
+!music ||
+!masterPrompt ||
+!scenesContainer
+) {
+throw new Error("Result elements are missing from index.html.");
+}
+
+title.textContent = project.title;
+
+story.innerHTML =
 "<p>${escapeHTML(project.story)}</p>";
 
-document.getElementById("character").innerHTML =
+character.innerHTML =
 "<p>${escapeHTML(project.character)}</p>";
 
-document.getElementById("voiceover").innerHTML =
+voiceover.innerHTML =
 "<p>${escapeHTML(project.voiceover)}</p>";
 
-document.getElementById("music").innerHTML =
+music.innerHTML =
 "<p>${escapeHTML(project.music)}</p>";
 
-document.getElementById("masterPrompt").textContent =
+masterPrompt.value =
 project.masterPrompt;
-
-const scenesContainer =
-document.getElementById("scenes");
 
 scenesContainer.innerHTML = "";
 
 project.scenes.forEach(scene => {
 
-const sceneElement =
+const card =
   document.createElement("div");
 
-sceneElement.className = "scene-card";
+card.className = "scene-card";
 
-sceneElement.innerHTML = `
-  <h4>🎬 Scene ${scene.number} — ${escapeHTML(scene.title)}</h4>
+card.innerHTML = `
+  <h4>
+    🎬 Scene ${scene.number} —
+    ${escapeHTML(scene.title)}
+  </h4>
 
   <div class="scene-info">
+
     <strong>🖼️ Image Prompt</strong>
-    <p>${escapeHTML(scene.imagePrompt)}</p>
+
+    <p>
+      ${escapeHTML(scene.imagePrompt)}
+    </p>
+
   </div>
 
   <div class="scene-info">
+
     <strong>🎥 Video Prompt</strong>
-    <p>${escapeHTML(scene.videoPrompt)}</p>
+
+    <p>
+      ${escapeHTML(scene.videoPrompt)}
+    </p>
+
   </div>
 
   <div class="scene-info">
+
     <strong>🗣️ Dialogue</strong>
-    <p>${escapeHTML(scene.dialogue)}</p>
+
+    <p>
+      ${escapeHTML(scene.dialogue)}
+    </p>
+
   </div>
 
   <div class="scene-actions">
@@ -530,39 +730,48 @@ sceneElement.innerHTML = `
   <div id="scene-image-${scene.number - 1}"></div>
 `;
 
-scenesContainer.appendChild(sceneElement);
+scenesContainer.appendChild(card);
 
 });
 }
 
 /* =========================
-IMAGE PLACEHOLDER
+IMAGE
 ========================= */
 
 function generateSceneImage(index) {
 
-if (!currentProject || !currentProject.scenes[index]) {
-alert("Please generate a video concept first.");
+if (
+!currentProject ||
+!currentProject.scenes[index]
+) {
+alert("Please generate your video concept first.");
 return;
 }
 
-const scene = currentProject.scenes[index];
+const scene =
+currentProject.scenes[index];
 
 const box =
-document.getElementById("scene-image-${index}");
+document.getElementById(
+"scene-image-${index}"
+);
+
+if (!box) return;
 
 box.innerHTML = `
-<div class="result-block" style="margin-top:15px;">
+<div class="result-block">
 
-  <h3>🖼️ Scene ${scene.number} Image</h3>
+  <h3>
+    🖼️ Scene ${scene.number} Image
+  </h3>
 
   <p>
     Your AI image prompt is ready.
-    Real image generation will be connected in the next step.
+    Real image generation will be connected after the local system is working.
   </p>
 
-  <button class="copy-btn"
-    onclick="copyImagePrompt(${index})">
+  <button onclick="copyImagePrompt(${index})">
     📋 Copy Image Prompt
   </button>
 
@@ -572,17 +781,17 @@ box.innerHTML = `
 }
 
 /* =========================
-COPY FUNCTIONS
+COPY
 ========================= */
 
 function copyScene(index) {
 
-const scene = currentProject?.scenes[index];
+if (!currentProject) return;
 
-if (!scene) {
-alert("Scene not found.");
-return;
-}
+const scene =
+currentProject.scenes[index];
+
+if (!scene) return;
 
 const text = `
 SCENE ${scene.number} — ${scene.title}
@@ -602,24 +811,24 @@ copyToClipboard(text);
 
 function copyImagePrompt(index) {
 
-const scene = currentProject?.scenes[index];
+if (!currentProject) return;
 
-if (!scene) {
-alert("Scene not found.");
-return;
-}
+const scene =
+currentProject.scenes[index];
+
+if (!scene) return;
 
 copyToClipboard(scene.imagePrompt);
 }
 
 function copyVideoPrompt(index) {
 
-const scene = currentProject?.scenes[index];
+if (!currentProject) return;
 
-if (!scene) {
-alert("Scene not found.");
-return;
-}
+const scene =
+currentProject.scenes[index];
+
+if (!scene) return;
 
 copyToClipboard(scene.videoPrompt);
 }
@@ -627,24 +836,35 @@ copyToClipboard(scene.videoPrompt);
 function copyMasterPrompt() {
 
 if (!currentProject) {
-alert("Please generate a concept first.");
+alert("Please generate a video concept first.");
 return;
 }
 
-copyToClipboard(currentProject.masterPrompt);
+copyToClipboard(
+currentProject.masterPrompt
+);
 }
 
 function copyToClipboard(text) {
 
-if (navigator.clipboard) {
+if (
+navigator.clipboard &&
+window.isSecureContext
+) {
 
 navigator.clipboard
   .writeText(text)
-  .then(() => alert("Copied! ✅"))
-  .catch(() => fallbackCopy(text));
+  .then(() => {
+    alert("Copied! ✅");
+  })
+  .catch(() => {
+    fallbackCopy(text);
+  });
 
 } else {
+
 fallbackCopy(text);
+
 }
 }
 
@@ -655,29 +875,43 @@ document.createElement("textarea");
 
 textarea.value = text;
 
+textarea.style.position = "fixed";
+textarea.style.left = "-9999px";
+
 document.body.appendChild(textarea);
 
+textarea.focus();
 textarea.select();
 
 try {
+
 document.execCommand("copy");
+
 alert("Copied! ✅");
+
 } catch {
+
 alert("Copy failed. Please copy manually.");
+
 }
 
 textarea.remove();
 }
 
 /* =========================
-SAVE CONCEPT
+DOWNLOAD
 ========================= */
 
 function downloadConcept() {
 
 if (!currentProject) {
-alert("Please generate a concept first.");
+
+alert(
+  "Please generate a video concept first."
+);
+
 return;
+
 }
 
 const text = `
@@ -698,7 +932,7 @@ ${currentProject.duration}
 LANGUAGE:
 ${currentProject.language}
 
-ASPECT:
+ASPECT RATIO:
 ${currentProject.aspect}
 
 MOOD:
@@ -711,13 +945,14 @@ STORY
 
 ${currentProject.story}
 
-CHARACTER
+MAIN CHARACTER
 
 ${currentProject.character}
 
 SCENES
 
 ${currentProject.scenes.map(scene => `
+
 SCENE ${scene.number} — ${scene.title}
 
 IMAGE PROMPT:
@@ -728,7 +963,8 @@ ${scene.videoPrompt}
 
 DIALOGUE:
 ${scene.dialogue}
-`).join("\n")}
+
+`).join("")}
 
 VOICE-OVER
 
@@ -743,17 +979,24 @@ MASTER PROMPT
 ${currentProject.masterPrompt}
 `;
 
-const blob = new Blob(
+const blob =
+new Blob(
 [text],
-{ type: "text/plain;charset=utf-8" }
+{
+type: "text/plain;charset=utf-8"
+}
 );
 
-const url = URL.createObjectURL(blob);
+const url =
+URL.createObjectURL(blob);
 
-const link = document.createElement("a");
+const link =
+document.createElement("a");
 
 link.href = url;
-link.download = "VidoAI-Project.txt";
+
+link.download =
+"VidoAI-Video-Project.txt";
 
 document.body.appendChild(link);
 
@@ -765,12 +1008,13 @@ URL.revokeObjectURL(url);
 }
 
 /* =========================
-HELPERS
+TITLE
 ========================= */
 
 function makeTitle(idea) {
 
-const words = idea
+const words =
+idea
 .replace(/[^\p{L}\p{N}\s]/gu, "")
 .split(/\s+/)
 .filter(Boolean)
@@ -785,12 +1029,18 @@ return words
 word.charAt(0).toUpperCase() +
 word.slice(1)
 )
-.join(" ") + " — VidoAI";
+.join(" ") +
+" — VidoAI";
 }
+
+/* =========================
+SUBJECT
+========================= */
 
 function getSubject(idea) {
 
-const lower = idea.toLowerCase();
+const lower =
+idea.toLowerCase();
 
 const subjects = [
 "monkey",
@@ -809,9 +1059,11 @@ const subjects = [
 ];
 
 for (const subject of subjects) {
+
 if (lower.includes(subject)) {
-return subject;
+  return subject;
 }
+
 }
 
 if (idea.includes("बंदर")) {
@@ -824,6 +1076,10 @@ return "বানর";
 
 return "the main character";
 }
+
+/* =========================
+HTML SECURITY
+========================= */
 
 function escapeHTML(text) {
 
